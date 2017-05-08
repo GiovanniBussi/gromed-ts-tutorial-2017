@@ -43,8 +43,6 @@ RUN apt install -yq vim \
  		make  \
  		autoconf  \
  		libopenmpi-dev  \
- 		libgfortran-6-dev  \
- 		gfortran-6  \
 	&& apt autoremove \
 	&& ssh-keygen -A
 #
@@ -64,42 +62,40 @@ WORKDIR /home/gromed
 #
 # First : setup PLUMED
 #
-RUN wget http://people.sissa.it/~inno/plumed-2.3.1.tgz  \
-	&& tar xfz plumed-2.3.1.tgz \
-	&& cd /home/gromed/plumed-2.3.1 \
-	&& echo 'export plumedir="/home/gromed/plumed-2.3.1"' >>/home/gromed/.bashrc \
-	&& echo 'export PLUMED_ROOT="/home/gromed/plumed-2.3.1"' >>/home/gromed/.bashrc \
-	&& echo 'export PLUMED_PREFIX="/home/gromed/plumed-2.3.1"' >>/home/gromed/.bashrc \
+RUN git clone https://github.com/plumed/plumed2.git \
+        && cd plumed2 \
 	&& ./configure \
-	&& source sourceme.sh ; make ; make install
+	&& GR_CORES=`cat /proc/cpuinfo |grep 'cpu cores'|uniq|sed -e 's/.*://'` \
+        && make -j $GR_CORES \
+        && make install
 
 #
 # Second : setup GROMACS
 #
-RUN wget http://ftp.gromacs.org/pub/gromacs/gromacs-2016.3.tar.gz \
-	&& tar xfz gromacs-2016.3.tar.gz \
-	&& cd gromacs-2016.3  \
-	&& plumed patch -p -e gromacs-2016.3 \
-	&& GR_SIMD="None SSE2 SSE4.1 AVX_256 AVX2_256 AVX_512" \
+RUN wget ftp://ftp.gromacs.org/pub/gromacs/gromacs-5.1.4.tar.gz \
+	&& tar xfz gromacs-5.1.4.tar.gz \
+	&& cd gromacs-5.1.4  \
+	&& plumed patch -p -e gromacs-5.1.4 \
+#	&& GR_SIMD="None SSE2 SSE4.1 AVX_256 AVX2_256 AVX_512" \
+	&& GR_SIMD="SSE2" \
 	&& GR_CORES=`cat /proc/cpuinfo |grep 'cpu cores'|uniq|sed -e 's/.*://'` \
 	&& for item in $GR_SIMD; do \
 		mkdir -p build-"$item" ; \
 		(cd build-"$item"; cmake ..  -DGMX_SIMD="$item" ; make -j $GR_CORES ); \
 	   done \
 	&&  (cd build-SSE2; make install) \
-	&&  echo "export PATH=/usr/local/gromacs/bin:${PATH}" >>/home/gromed/.bashrc \
 	&&  echo "source /usr/local/gromacs/bin/GMXRC" >>/home/gromed/.bashrc
 
 #
 # move tarballs in downloads/ directory
 #
 RUN    	mkdir downloads \
-	&& mv gromacs-2016.3.tar.gz plumed-2.3.1.tgz downloads/
+	&& mv gromacs-5.1.4.tar.gz plumed2 downloads/
 #
 # get from github and copy tuning script inside gromacs directory
 #
 RUN	wget 	https://raw.githubusercontent.com/rinnocente/gromed/edits/tune-gromacs.sh \
-	&& mv tune-gromacs.sh gromacs-2016.3/
+	&& mv tune-gromacs.sh gromacs-5.1.4
 
 #
 # change owner to gromed:gromed
