@@ -74,7 +74,7 @@ RUN     cd ${GR_HD} \
 	&& git clone https://github.com/plumed/plumed2.git \
 	&& cd plumed2 \
 	&& git checkout ${PL_VER} \
-	&& ./configure \
+	&& ./configure CXXFLAGS=-O3 \
 	&& make -j $GR_CORES \
         && make install
 
