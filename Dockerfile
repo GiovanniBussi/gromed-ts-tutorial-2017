@@ -47,6 +47,7 @@ RUN apt install -yq vim \
  		gfortran-6  \
                 python3-numpy \
                 python3-scipy \
+                zlib1g zlib1g-dev \
 	&& apt autoremove \
 	&& ssh-keygen -A
 #
