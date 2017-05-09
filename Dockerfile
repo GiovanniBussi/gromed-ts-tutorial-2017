@@ -66,7 +66,7 @@ RUN sed -i 's#^StrictModes.*#StrictModes no#' /etc/ssh/sshd_config \
 WORKDIR /home/gromed
 ENV     GR_HD="/home/gromed" \
    	GR_VER="-5.1.4" \
-   	PL_VER="v2.3.1"  
+   	PL_VER="master"  
 #
 # First : setup PLUMED
 #
