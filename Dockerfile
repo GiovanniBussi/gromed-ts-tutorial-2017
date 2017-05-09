@@ -64,19 +64,19 @@ RUN sed -i 's#^StrictModes.*#StrictModes no#' /etc/ssh/sshd_config \
 #
 WORKDIR /home/gromed
 ENV     GR_HD="/home/gromed" \
-   	GR_VER="-2016.3"  \
-   	PL_VER="-2.3.1"  
+   	GR_VER="-5.1.4" \
+   	PL_VER="v2.3.1"  
 #
 # First : setup PLUMED
 #
-RUN 	wget http://people.sissa.it/~inno/plumed${PL_VER}.tgz  \
-	&& tar xfz plumed${PL_VER}.tgz \
-	&& cd ${GR_HD}/plumed${PL_VER} \
-	&& echo export plumedir="${GR_HD}/plumed${PL_VER}" >>${GR_HD}/.bashrc \
-	&& echo export PLUMED_ROOT="${GR_HD}/plumed${PL_VER}" >>${GR_HD}/.bashrc \
-	&& echo export PLUMED_PREFIX="${GR_HD}/plumed${PL_VER}" >>${GR_HD}/.bashrc \
+RUN     cd ${GR_HD} \
+	&& GR_CORES=`cat /proc/cpuinfo |grep 'cpu cores'|uniq|sed -e 's/.*://'` \
+	&& git clone https://github.com/plumed/plumed2.git \
+	&& cd plumed2 \
+	&& git checkout ${PL_VER} \
 	&& ./configure \
-	&& source sourceme.sh ; make ; make install
+	&& make -j $GR_CORES \
+        && make install
 
 #
 # Second : setup GROMACS
@@ -85,7 +85,8 @@ RUN 	wget http://ftp.gromacs.org/pub/gromacs/gromacs${GR_VER}.tar.gz \
 	&& tar xfz gromacs${GR_VER}.tar.gz \
 	&& cd gromacs${GR_VER}  \
 	&& plumed patch -p -e gromacs${GR_VER} \
-	&& GR_SIMD="None SSE2 SSE4.1 AVX_256 AVX2_256 AVX_512" \
+        && GR_SIMD="None SSE2 SSE4.1 AVX_256 AVX2_256 AVX_512" \
+	&& if [ "$TRAVIS" = true ] ; then GR_SIMD="SSE2" ; fi \
 	&& GR_CORES=`cat /proc/cpuinfo |grep 'cpu cores'|uniq|sed -e 's/.*://'` \
 	&& for item in $GR_SIMD; do \
 		mkdir -p build-"$item" ; \
@@ -99,7 +100,7 @@ RUN 	wget http://ftp.gromacs.org/pub/gromacs/gromacs${GR_VER}.tar.gz \
 # move tarballs in downloads/ directory
 #
 RUN    	mkdir downloads \
-	&& mv gromacs${GR_VER}.tar.gz plumed${PL_VER}.tgz downloads/
+	&& mv gromacs${GR_VER}.tar.gz plumed2 downloads/
 #
 COPY	tune-gromacs.sh ${GR_HD}/gromacs${GR_VER}/
 #
