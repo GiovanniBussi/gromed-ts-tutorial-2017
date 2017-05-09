@@ -76,7 +76,7 @@ RUN     cd ${GR_HD} \
 	&& cd plumed2 \
 	&& git checkout ${PL_VER} \
 	&& ./configure CXXFLAGS=-O3 \
-	&& make -j $GR_CORES \
+	&& make -j $((2*GR_CORES)) \
         && make install
 
 #
@@ -93,7 +93,7 @@ RUN 	wget http://ftp.gromacs.org/pub/gromacs/gromacs${GR_VER}.tar.gz \
 		mkdir -p build-"$item" ; \
 		(cd build-"$item"; cmake .. \
 			-DGMX_SIMD="$item" -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpicxx  \
-			-DGMX_THREAD_MPI:BOOL=OFF -DGMX_MPI:BOOL=ON ; make -j $GR_CORES ); \
+			-DGMX_THREAD_MPI:BOOL=OFF -DGMX_MPI:BOOL=ON ; make -j $((2*GR_CORES)) ); \
 	   done \
 	&&  (cd build-SSE2; make install) \
 	&&  echo "export PATH=/usr/local/gromacs/bin:${PATH}" >>${GR_HD}/.bashrc \
