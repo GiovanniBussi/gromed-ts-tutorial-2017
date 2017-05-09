@@ -104,7 +104,7 @@ RUN 	wget http://ftp.gromacs.org/pub/gromacs/gromacs${GR_VER}.tar.gz \
 # move tarballs in downloads/ directory
 #
 RUN    	mkdir downloads \
-	&& mv gromacs${GR_VER}.tar.gz plumed2 downloads/
+	&& mv gromacs${GR_VER}.tar.gz downloads/
 #
 COPY	tune-gromacs.sh ${GR_HD}/gromacs${GR_VER}/
 #

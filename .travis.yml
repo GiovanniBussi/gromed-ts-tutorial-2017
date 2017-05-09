@@ -6,8 +6,12 @@ services:
 before_install:
 # hack to set a variable in the dockerfile
   - sed s/__TRAVIS__/true/ Dockerfile > Dockerfile.tmp && mv Dockerfile.tmp Dockerfile
-  - docker build .
+  - docker build -t gromed .
 
 script:
-  - echo "nothing to do yet"
+# run plumed regression tests
+  - docker run -u gromed -it gromed /bin/bash -c "cd plumed2 && make -C regtest"
+# the last line could be replaced with the following
+# once regtests have been adjusted not to fail when using gcc6
+#  - docker run -u gromed -it gromed /bin/bash -c "cd plumed2 && make -C regtest && make -C regtest checkfail"
 
