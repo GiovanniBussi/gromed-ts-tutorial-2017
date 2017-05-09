@@ -4,9 +4,7 @@ services:
   - docker
 
 before_install:
-# hack to set a variable in the dockerfile
-  - sed s/__TRAVIS__/true/ Dockerfile > Dockerfile.tmp && mv Dockerfile.tmp Dockerfile
-  - docker build -t gromed .
+  - docker build -t gromed --build-arg GR_SIMD="SSE2" .
 
 script:
 # run plumed regression tests
