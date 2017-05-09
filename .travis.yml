@@ -4,6 +4,8 @@ services:
   - docker
 
 before_install:
+# hack to set a variable in the dockerfile
+  - sed s/__TRAVIS__/true/ Dockerfile > Dockerfile.tmp && mv Dockerfile.tmp Dockerfile
   - docker build .
 
 script:
