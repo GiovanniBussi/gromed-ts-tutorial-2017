@@ -49,8 +49,13 @@ RUN apt install -yq vim \
  		libopenmpi-dev  \
  		libgfortran-6-dev  \
  		gfortran-6  \
-                python3-numpy \
-                python3-scipy \
+		python3-numpy \
+		python3-scipy \
+		xxd \
+		screen \
+		man \
+                emacs \
+                nano \
                 zlib1g zlib1g-dev \
 	&& apt autoremove \
 	&& ssh-keygen -A
