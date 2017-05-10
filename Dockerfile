@@ -86,7 +86,8 @@ RUN     cd ${GR_HD} \
 	&& git checkout ${PL_VER} \
 	&& ./configure CXXFLAGS=-O3 \
 	&& make -j $((2*GR_CORES)) \
-        && make install
+        && make install \
+	&& make clean
 
 #
 # Second : setup GROMACS
